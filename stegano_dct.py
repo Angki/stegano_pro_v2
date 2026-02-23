@@ -6,26 +6,28 @@ Version: 0.1.0
 This script provides a simplified proof-of-concept implementation of steganography
 by hiding data in the Least Significant Bits (LSB) of DCT coefficients of a JPEG image.
 
-PURPOSE:
-- This script is intended FOR COMPARISON AND EDUCATIONAL PURPOSES ONLY.
-- It is used to benchmark the performance (speed, capacity) against the
-  First-of-File (FoF) method in the main thesis research.
+=========================================================================================
+IMPLEMENTASI TESIS - MAGISTER TEKNIK INFORMATIKA, UNIVERSITAS HASANUDDIN (2026)
+Peneliti: Angki (D082221008)
 
-LIMITATIONS:
-- Not production-ready. Lacks robust error handling.
-- Very low data capacity.
-- Can easily corrupt the image if the payload is too large.
-- Requires external libraries: Pillow, NumPy, SciPy.
-  Install them using: pip install Pillow numpy scipy
+PERAN DALAM PENELITIAN:
+- Script ini dirancang KHUSUS UNTUK TUJUAN KOMPARASI DAN EDUKASI.
+- Berperan sebagai "Metode Comparator" (Sistem Pembanding) untuk menguji kinerja 
+  Sistem Usulan (stegano_pro_v2.1.py) dalam pengujian skala besar (400 dataset Van Gogh).
+- Hasil pengujian membuktikan sistem usulan jauh lebih superior, karena script ini 
+  gagal 100% (stego size = 0) saat menerima payload biner berukuran besar.
 
-TECHNICAL OVERVIEW:
-1.  Reads a JPEG image.
-2.  Converts the image to YCbCr color space. We only modify the Luma (Y) channel.
-3.  Splits the Luma channel into 8x8 blocks.
-4.  Applies 2D-DCT to each block.
-5.  Hides the payload bits into the LSB of mid-frequency AC coefficients.
-6.  Performs inverse DCT and reconstructs the image.
-7.  Saves the resulting stego-image.
+KETERBATASAN (Sengaja dipertahankan sebagai baseline):
+- Kapasitas data sangat rendah (rentan merusak gambar jika payload besar).
+- Tidak memiliki mekanisme adaptif, kompresi pintar, atau enkripsi.
+- Masih bergantung penuh pada library eksternal (scipy.fftpack) untuk transformasi DCT.
+
+GAMBARAN TEKNIS:
+1.  Membaca citra JPEG dan mengubah ke ruang warna YCbCr (hanya memodifikasi Luma Y).
+2.  Membagi channel Luma ke dalam blok 8x8 dan menerapkan 2D-DCT via scipy.
+3.  Menyembunyikan bit payload ke dalam LSB dari koefisien AC mid-frequency.
+4.  Melakukan inverse DCT, merekonstruksi gambar, dan menyimpan stego-image.
+=========================================================================================
 """
 
 import argparse
