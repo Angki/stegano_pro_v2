@@ -221,33 +221,63 @@ python stegano_pro_v2.1.py -vv embed ...   # DEBUG
 
 ### Skenario 1 — 19 Cover Image, Variasi Payload 1–4 File
 
-- **Mode Append:** PSNR = ∞, RMSE = 0 (tidak ada perubahan visual sama sekali).
-- **Efisiensi Storage (Negative Delta):** hampir semua pengujian menunjukkan nilai delta negatif — artinya file stego akhir lebih kecil dari (cover + payload asli). Contoh: `-223 KB` pada `street_texture_26`.
-- **Latensi:** payload < 1 MB → 0.56–0.95 detik. Payload besar (~30 MB) → ~14 detik (wajar untuk proses non-realtime).
+**Dataset cover:** 3 kategori (kamera, internet, WhatsApp)
+- Kamera: `20230901_024823.jpg`, `IMG_20250930_010538.jpg`, `_DSC0419.JPG`, `_DSC0428.JPG`
+- Internet: `FB_IMG_*.jpg`, `Layer 2 - *.png`, `street_texture_*.jpg`, `Wow-zip *.png`
+- WhatsApp: `IMG-20231113-WA0000.jpg`, `IMG-20250508-WA0021.jpg`
 
-### Skenario 2 — 400 Citra Van Gogh Artworks
+**Dataset payload:** PDF, MP3, PPTX, DOCX (KRS, KHS, Audio 1–3, PPT Proposal, Manajemen Risiko, Presentasi, Tugas Metopel, Cyber Security Survey)
 
-| | Sistem Usulan | Comparator (DCT Standar) |
+| Skenario | N | Avg Latency | Avg Delta Efisiensi |
+|---|---|---|---|
+| 1 payload | 19 | 4,22 det | **−57,0 KB** |
+| 2 payload | 19 | 2,97 det | **−97,6 KB** |
+| 3 payload | 19 | 4,25 det | **−156,6 KB** |
+| 4 payload | 19 | 6,46 det | **−195,2 KB** |
+| **Total/Avg** | **76** | **4,47 det** | **−126,6 KB** |
+
+- **Tingkat keberhasilan: 76/76 = 100%** (log: semua berstatus `Success`)
+- **Delta selalu negatif:** −2,9 KB s/d −316,1 KB → file stego *lebih kecil* dari gabungan cover + payload asli
+- **PSNR = ∞, RMSE = 0** — mode append tidak mengubah visual gambar sama sekali
+- Latency terlama: `street_texture_26.jpg` + 4 file audio (~30 MB) = **14,15 detik**
+- Latency tercepat: `IMG_20250930_010538.jpg` + `KRS` (291 KB) = **0,56 detik**
+
+### Skenario 2 — 400 Citra Van Gogh Artworks (Uji Komparasi)
+
+Pengujian skala besar membandingkan **Sistem Usulan** vs **Comparator (`stegano_dct.py`)** terhadap 400 citra Van Gogh (data dari `laporan_uji_2_komparasi.csv` dan `uji_v2.log`).
+
+| Metrik | Sistem Usulan | Comparator (DCT Standar) |
 |---|---|---|
-| Tingkat keberhasilan | **100%** | 12% (payload > 50 KB) |
-| Rata-rata latensi | **1,24 detik** | 0,61 detik |
-| Delta efisiensi storage | **−84,5 KB / transaksi** | — |
+| Embedding berhasil | **400/400 (100%)** | 0/400 — `comp_stego_size = 0` semua |
+| Avg latency | **1,55 detik** | 0,77 detik |
+| Avg delta efisiensi | **−56,3 KB / gambar** | — |
+| Label efisiensi | **`Efficient` (100%)** | — |
 
-Overhead tambahan ~0,6 detik pada sistem usulan digunakan untuk Logic Selector (memilih LZ77/LZ78) dan enkripsi AES-256.
+> **Log finding:** Kolom `comp_stego_size = 0` pada **seluruh 400 baris** membuktikan bahwa comparator gagal total menyisipkan payload binary berukuran besar. Ini konsisten dengan keterbatasan kapasitas DCT-LSB standar (`stegano_dct.py` yang menggunakan `scipy`) yang hanya mampu menyisipkan string teks pendek.
+
+**Distribusi latency sistem usulan (Uji 2):**
+
+| Stat | Nilai |
+|---|---|
+| Min | 0,37 detik |
+| Max | 5,29 detik |
+| **Avg** | **1,55 detik** |
 
 ### Ketahanan Transmisi
 
-| Platform | Tingkat Ekstraksi (sebagai dokumen) |
-|---|---|
-| WhatsApp | 98% |
-| Telegram | 97% |
+| Platform | Mode | Kondisi | Hasil |
+|---|---|---|---|
+| WhatsApp | Append | Kirim **sebagai dokumen** | ✅ Berhasil diekstrak |
+| Telegram | Append | Kirim **sebagai dokumen** | ✅ Berhasil diekstrak |
+| WhatsApp/Telegram | Append | Kirim sebagai **foto/media** | ❌ Gagal — rekompresi menghapus marker |
 
-> **Penting:** Pengiriman harus dilakukan **sebagai dokumen**, bukan sebagai foto. Pengiriman sebagai foto akan menyebabkan rekompresi yang menghapus marker dan payload.
+> Syarat: file harus dikirim sebagai **dokumen**, bukan foto.
 
 ### Efektivitas Kompresi Adaptif
 
-- Data teks dan PDF → penghematan signifikan (LZ78 dan LZ77 efektif).
-- Data yang sudah terkompresi (MP3, PPTX) → keuntungan terbatas, algoritma tetap memilih yang terbaik secara otomatis.
+- Payload teks & PDF → penghematan signifikan, LZ78 sering dipilih
+- Payload audio MP3 (sudah terkompresi ketat) → keuntungan terbatas, LZ77 biasanya menang
+- **Seluruh 400 hasil** dilabeli `Efficient` — sistem selalu menggunakan algoritma terbaik secara otomatis.
 
 ---
 
