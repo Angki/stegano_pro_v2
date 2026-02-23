@@ -95,7 +95,7 @@ graph TD
     
     Comp --> Race{LZ77 vs LZ78}
     Race -->|Hitung delta| BestComp(Pilih output terkecil)
-    BestComp --> Encrypt{--encrypt? (AES-GCM)}
+    BestComp --> Encrypt{"--encrypt? (AES-GCM)"}
     
     Encrypt -->|Ya| AES(AES-256-GCM)
     Encrypt -->|Tidak| NoEnc(Plain)
@@ -342,6 +342,10 @@ python stegano_pro_v2.1.py -vv embed ...   # DEBUG
 | 4 payload | 19 | 6,46 det | **−195,2 KB** |
 | **Total/Avg** | **76** | **4,47 det** | **−126,6 KB** |
 
+![Grafik Scatter Korelasi](assets/grafik_1_scatter_korelasi.png)
+
+![Grafik Efisiensi Storage](assets/grafik_2_bar_efisiensi.png)
+
 - **Tingkat keberhasilan: 76/76 = 100%** (log: semua berstatus `Success`)
 - **Delta selalu negatif:** −2,9 KB s/d −316,1 KB → file stego *lebih kecil* dari gabungan cover + payload asli
 - **PSNR = ∞, RMSE = 0** — mode append tidak mengubah visual gambar sama sekali
@@ -359,6 +363,8 @@ Pengujian skala besar membandingkan **Sistem Usulan** vs **Comparator (`stegano_
 | Avg delta efisiensi | **−56,3 KB / gambar** | — |
 | Label efisiensi | **`Efficient` (100%)** | — |
 
+![Grafik Success Rate](assets/grafik_3_bar_success_rate.png)
+
 > **Log finding:** Kolom `comp_stego_size = 0` pada **seluruh 400 baris** membuktikan bahwa comparator gagal total menyisipkan payload binary berukuran besar. Ini konsisten dengan keterbatasan kapasitas DCT-LSB standar (`stegano_dct.py` yang menggunakan `scipy`) yang hanya mampu menyisipkan string teks pendek.
 
 **Distribusi latency sistem usulan (Uji 2):**
@@ -368,6 +374,8 @@ Pengujian skala besar membandingkan **Sistem Usulan** vs **Comparator (`stegano_
 | Min | 0,37 detik |
 | Max | 5,29 detik |
 | **Avg** | **1,55 detik** |
+
+![Grafik Latensi Komparasi](assets/grafik_4_bar_latensi_komparasi.png)
 
 ### Ketahanan Transmisi
 
